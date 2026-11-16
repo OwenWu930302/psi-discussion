@@ -1,0 +1,141 @@
+"""
+BUSI 討論實驗的分析：逐張結果（last）→ busi/results/analysis/（格式比照 psi-weighted-busi/results/analysis）
+輸入
+  對照組、Ψ8 專家、moved、baseline：psi-weighted-busi/results/percase/
+  本倉庫的模型                     ：busi/results/percase/busi_UKAN_<模型>_last.csv
+  擾動測試逐張                     ：busi/results/analysis/perturb_BUSI_percase.csv、sweep_BUSI_percase.csv
+輸出
+  aug_BUSI_models.csv    每個模型一列：訓練張數、資料增強、Dropout、Ψ 加權、測試集各組、訓練集、差距
+  aug_BUSI_summary.csv   成對比較（control → model），各組的前後變化與 Wilcoxon
+  aug_BUSI_percase.csv   成對比較的逐張前後（測試集 130 張；搬移比較另含那 9 張）
+  perturb_BUSI_summary.csv、sweep_BUSI_summary.csv、shift_sweep_BUSI.png
+組別（以官方原始切分定義）：all 130、other 115、low_dice 15（baseline seed2981 best 的 Dice < 0.5）、
+  nine 9（moved_busi_dice02.csv）、train 517（原訓練集）；搬移模型的測試集只剩 121 張（remaining）
+用法（psi-discussion 根目錄，兩個倉庫 clone 在同一層）：
+  python busi/code/make_busi_results.py --busi_repo ../psi-weighted-busi --disc .
+"""
+import argparse
+import os
+
+import numpy as np
+import pandas as pd
+from scipy.stats import wilcoxon
+
+ap = argparse.ArgumentParser()
+ap.add_argument('--busi_repo', default='../psi-weighted-busi')
+ap.add_argument('--disc', default='.')
+args = ap.parse_args()
+PC = os.path.join(args.disc, 'busi', 'results', 'percase')
+OUT = os.path.join(args.disc, 'busi', 'results', 'analysis')
+
+# 模型：名稱 → (訓練張數, 資料增強, Dropout, Ψ 加權)
+OFF = 'flip+rot90'
+SH = OFF + ' + shift32'
+SSR = SH + ' + scale10 + rotate15'
+MODELS = [('base2', 517, OFF, 0, 'none'), ('base3', 517, OFF, 0, 'none'), ('psi8w3n', 517, OFF, 0, 'psi8 x3'),
+          ('shift', 517, SH, 0, 'none'), ('shift_r2', 517, SH, 0, 'none'), ('ssr', 517, SSR, 0, 'none'),
+          ('ssr_int', 517, SSR + ' + intensity20', 0, 'none'), ('psi8w3n_shift', 517, SH, 0, 'psi8 x3'),
+          ('drop1', 517, OFF, 0.1, 'none'), ('drop3', 517, OFF, 0.3, 'none'),
+          ('shift_drop1', 517, SH, 0.1, 'none'), ('shift_drop3', 517, SH, 0.3, 'none'),
+          ('moved', 526, OFF, 0, 'none'), ('shift_moved', 526, SH, 0, 'none')]
+COMPS = [('noise_noaug', 'base2', 'base3'), ('noise_shift', 'shift', 'shift_r2'),
+         ('shift', 'base2', 'shift'), ('shift', 'base3', 'shift'), ('shift_r2', 'base2', 'shift_r2'), ('shift_r2', 'base3', 'shift_r2'),
+         ('ssr', 'shift', 'ssr'), ('ssr', 'shift_r2', 'ssr'), ('ssr_int', 'ssr', 'ssr_int'),
+         ('psi8_noaug', 'base2', 'psi8w3n'), ('psi8_noaug', 'base3', 'psi8w3n'),
+         ('psi8_shift', 'shift', 'psi8w3n_shift'), ('psi8_shift', 'shift_r2', 'psi8w3n_shift'),
+         ('drop1', 'base2', 'drop1'), ('drop1', 'base3', 'drop1'), ('drop3', 'base2', 'drop3'), ('drop3', 'base3', 'drop3'),
+         ('shift_drop1', 'shift', 'shift_drop1'), ('shift_drop1', 'shift_r2', 'shift_drop1'),
+         ('shift_drop3', 'shift', 'shift_drop3'), ('shift_drop3', 'shift_r2', 'shift_drop3'),
+         ('moved_noaug', 'base2', 'moved'), ('moved_shift', 'shift', 'shift_moved'), ('moved_shift', 'moved', 'shift_moved')]
+
+
+def load(name, which='last'):
+    for d in [os.path.join(args.busi_repo, 'results', 'percase'), PC]:
+        f = os.path.join(d, f'busi_UKAN_{name}_{which}.csv')
+        if os.path.exists(f):
+            return pd.read_csv(f).set_index('case').dice
+    return None
+
+
+def pval(x):
+    return float(wilcoxon(x).pvalue) if len(x) > 1 and np.any(x != 0) else np.nan
+
+
+R = lambda f: pd.read_csv(f, encoding='utf-8-sig')
+base = R(os.path.join(args.busi_repo, 'results', 'percase', 'busi_UKAN_seed2981_best.csv')).set_index('case')
+nine = pd.Index(R(os.path.join(args.busi_repo, 'weight_lists', 'moved_busi_dice02.csv')).case.astype(str))
+tr, te = base.index[base.split == 'train'], base.index[base.split == 'val']
+low = base.index[(base.split == 'val') & (base.dice < 0.5)]
+M = {k: v for k, v in ((k, load(k)) for k, *_ in MODELS) if v is not None}
+print('模型：' + '、'.join(M))
+
+rows = []
+for name, ntr, aug, drop, psi in MODELS:
+    if name not in M:
+        continue
+    d, t = M[name], (te.difference(nine) if ntr == 526 else te)
+    r = dict(model=f'busi_UKAN_{name}', train_images=ntr, augmentation=aug, dropout=drop, psi_weight=psi, n_test=len(t),
+             test_all=d.reindex(t).mean(), test_other=d.reindex(t.difference(low)).mean(),
+             test_low_dice=d.reindex(t.intersection(low)).mean(), nine=d.reindex(nine).mean(),
+             nine_in_train='yes' if ntr == 526 else 'no', train_all=d.reindex(tr).mean())
+    r['gap'] = r['train_all'] - r['test_all']
+    rows.append(r)
+os.makedirs(OUT, exist_ok=True)
+pd.DataFrame(rows).to_csv(f'{OUT}/aug_BUSI_models.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+
+S, P = [], []
+for comp, a, b in COMPS:
+    if a not in M or b not in M:
+        continue
+    moved = 'moved' in comp
+    groups = ([('nine', nine), ('remaining', te.difference(nine)), ('train', tr)] if moved else
+              [('all', te), ('other', te.difference(low)), ('low_dice', low), ('nine', nine), ('train', tr)])
+    for g, idx in groups:
+        x, y = M[a].reindex(idx), M[b].reindex(idx)
+        dd = (y - x).to_numpy()
+        S.append(dict(comparison=comp, control=f'busi_UKAN_{a}', model=f'busi_UKAN_{b}', group=g, n=len(idx), before_control=x.mean(),
+                      after_model=y.mean(), delta=dd.mean(), n_up=int((dd > 0).sum()), n_down=int((dd < 0).sum()), wilcoxon_p=pval(dd)))
+    idx = te.union(nine)
+    for c in idx:
+        P.append(dict(comparison=comp, control=f'busi_UKAN_{a}', model=f'busi_UKAN_{b}', case=c,
+                      split='test' if (c in te and not (moved and c in nine)) else 'train',
+                      low_dice='yes' if c in low else 'no', nine='yes' if c in nine else 'no',
+                      before_control=M[a].get(c), after_model=M[b].get(c), delta=M[b].get(c) - M[a].get(c)))
+S = pd.DataFrame(S)
+S['wilcoxon_p'] = S.wilcoxon_p.map(lambda v: '' if pd.isna(v) else (f'{v:.1e}' if v < 0.001 else f'{v:.4f}'))
+S.to_csv(f'{OUT}/aug_BUSI_summary.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+pd.DataFrame(P).to_csv(f'{OUT}/aug_BUSI_percase.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+
+# 擾動測試摘要（方向 / 正負合併）
+for kind, extra in [('perturb', {}), ('sweep', {'prob_gt_mean': ('prob_gt', 'mean')})]:
+    d = R(f'{OUT}/{kind}_BUSI_percase.csv')
+    s = (d.groupby(['model', 'group', 'perturb', 'strength', 'level'], sort=False)
+          .agg(n=('dice', 'size'), dice_mean=('dice', 'mean'), n_below_05=('dice', lambda v: int((v < 0.5).sum())), **extra).reset_index())
+    s.to_csv(f'{OUT}/{kind}_BUSI_summary.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+
+# 平移掃描曲線
+s = R(f'{OUT}/sweep_BUSI_summary.csv')
+try:
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(8, 5.4), dpi=150)
+    for m, g, lab, c, ls in [('busi_UKAN_moved', 'train_ref30', 'normal 30 train images, moved (no shift aug)', '#9a9a9a', '-'),
+                             ('busi_UKAN_shift', 'train_ref30', 'normal 30 train images, shift (shift aug)', '#9a9a9a', '--'),
+                             ('busi_UKAN_moved', 'nine', 'the 9 hard images, moved (seen, no shift aug)', '#1f6fd1', '-'),
+                             ('busi_UKAN_shift_moved', 'nine', 'the 9 hard images, shift_moved (seen, shift aug)', '#1f6fd1', '--')]:
+        t = s[(s.model == m) & (s.group == g)].sort_values('level')
+        if len(t):
+            ax.plot(t.level, t.dice_mean, ls, color=c, marker='o', ms=3, lw=2, label=lab)
+    for v in (32, 64):
+        ax.axvline(v, color='#bbbbbb', ls=':', lw=1)
+    ax.text(33, 0.04, 'shift = 32, 64 px (multiples of the 32x downsampling)', fontsize=8, color='#666666')
+    ax.set(xlabel='integer shift (px, mean of right and down)', ylabel='mean Dice', ylim=(0, 1.02), xticks=[0, 8, 16, 24, 32, 40, 48, 64])
+    ax.grid(axis='y', color='#eeeeee')
+    ax.legend(fontsize=8, loc='upper center', bbox_to_anchor=(0.5, -0.14), ncol=2, frameon=False)
+    ax.set_title('Dice drops whenever the shift is not a multiple of 32 px; shift augmentation flattens it', fontsize=10)
+    fig.tight_layout()
+    fig.savefig(f'{OUT}/shift_sweep_BUSI.png')
+except ImportError:
+    print('沒有 matplotlib，略過 shift_sweep_BUSI.png')
+print(f'→ {OUT}/')
