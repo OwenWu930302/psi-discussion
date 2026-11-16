@@ -1,0 +1,11 @@
+﻿model,train_images,augmentation,dropout,note,n_test,test_all,test_other,test_low_dice,nine,nine_seen,train_all,source,gap
+busi_UKAN_base2,517,flip+rot90（官方）,0,對照組,130,0.7818,0.8604,0.1799,0.0026,False,0.9659,../../psi-weighted-busi/results/percase/busi_UKAN_base2_last.csv,0.1841
+busi_UKAN_base3,517,flip+rot90（官方）,0,對照組重訓（雜訊）,130,0.7912,0.8741,0.1556,0.0055,False,0.9666,../../psi-weighted-busi/results/percase/busi_UKAN_base3_last.csv,0.1754
+busi_UKAN_psi8w3n,517,flip+rot90（官方）,0,Ψ8 加權 ×3,130,0.8040,0.8824,0.2032,0.0158,False,0.9592,../../psi-weighted-busi/results/percase/busi_UKAN_psi8w3n_last.csv,0.1552
+busi_UKAN_moved,526,flip+rot90（官方）,0,9 張搬進訓練集,121,0.8373,0.8528,0.5416,0.9622,True,0.9675,../../psi-weighted-busi/results/percase/busi_UKAN_moved_last.csv,0.1302
+busi_UKAN_shift,517,flip+rot90 + shift ±32px,0,平移增強,130,0.8184,0.8949,0.2326,0.0889,False,0.9389,busi/2026-11-14_shiftaug/percase/busi_UKAN_shift_last.csv,0.1204
+busi_UKAN_shift_r2,517,flip+rot90 + shift ±32px,0,平移增強重訓,130,0.8179,0.8953,0.2251,0.0698,False,0.9356,busi/2026-11-15_aug/percase/busi_UKAN_shift_r2_last.csv,0.1177
+busi_UKAN_ssr,517,flip+rot90 + shift ±32px + scale ±10% + rotate ±15°,0,,130,0.8220,0.9020,0.2086,0.0625,False,0.9289,busi/2026-11-15_aug/percase/busi_UKAN_ssr_last.csv,0.1069
+busi_UKAN_ssr_int,517,flip+rot90 + shift ±32px + scale ±10% + rotate ±15° + brightness/contrast ±20% + gamma,0,,130,0.8181,0.8943,0.2338,0.0701,False,0.9260,busi/2026-11-15_aug/percase/busi_UKAN_ssr_int_last.csv,0.1079
+busi_UKAN_psi8w3n_shift,517,flip+rot90 + shift ±32px,0,Ψ8 加權 ×3,130,0.8102,0.8916,0.1859,0.0222,False,0.9279,busi/2026-11-15_aug/percase/busi_UKAN_psi8w3n_shift_last.csv,0.1177
+busi_UKAN_shift_moved,526,flip+rot90 + shift ±32px,0,9 張搬進訓練集,121,0.8722,0.8947,0.4419,0.7893,True,0.9358,busi/2026-11-14_shiftaug/percase/busi_UKAN_shift_moved_last.csv,0.0636
