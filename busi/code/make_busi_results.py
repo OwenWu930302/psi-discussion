@@ -8,6 +8,7 @@ BUSI 討論實驗的分析：逐張結果（last）→ busi/results/analysis/（
   aug_BUSI_models.csv    每個模型一列：訓練張數、資料增強、Dropout、Ψ 加權、測試集各組、訓練集、差距
   aug_BUSI_summary.csv   成對比較（control → model），各組的前後變化與 Wilcoxon
   aug_BUSI_percase.csv   成對比較的逐張前後（測試集 130 張；搬移比較另含那 9 張）
+  low_dice_BUSI_percase.csv、low_dice_BUSI_wide.csv、low_dice_BUSI_summary.csv  低分 15 張每個模型逐張的前後
   perturb_BUSI_summary.csv、sweep_BUSI_summary.csv、shift_sweep_BUSI.png
 組別（以官方原始切分定義）：all 130、other 115、low_dice 15（baseline seed2981 best 的 Dice < 0.5）、
   nine 9（moved_busi_dice02.csv）、train 517（原訓練集）；搬移模型的測試集只剩 121 張（remaining）
@@ -105,6 +106,40 @@ S = pd.DataFrame(S)
 S['wilcoxon_p'] = S.wilcoxon_p.map(lambda v: '' if pd.isna(v) else (f'{v:.1e}' if v < 0.001 else f'{v:.4f}'))
 S.to_csv(f'{OUT}/aug_BUSI_summary.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
 pd.DataFrame(P).to_csv(f'{OUT}/aug_BUSI_percase.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+
+# 低分 15 張：每個模型逐張的前後（before = 對照組 base2，after = 該模型；last）
+#   low_dice_BUSI_percase.csv  一個模型 × 一張影像一列（格式同 psi-weighted-busi 的 test_BUSI_percase.csv）
+#   low_dice_BUSI_wide.csv     一張影像一列、每個模型一欄（方便直接看）
+#   low_dice_BUSI_summary.csv  每個模型在 low_dice（15）、nine（9）、low_other（6）三組的平均前後
+ctrl = M['base2']
+P, W = [], pd.DataFrame(index=low)
+W['nine'] = ['yes' if c in nine else 'no' for c in low]
+W['baseline_dice'] = base.dice.reindex(low)
+for name, ntr, *_ in MODELS:
+    if name not in M:
+        continue
+    W[name] = M[name].reindex(low)
+    if name == 'base2':
+        continue
+    for c in low:
+        P.append(dict(model=f'busi_UKAN_{name}', case=c, split='train' if (ntr == 526 and c in nine) else 'test',
+                      nine='yes' if c in nine else 'no', baseline_dice=base.dice.get(c), before_control=ctrl.get(c),
+                      after_model=M[name].get(c), delta=M[name].get(c) - ctrl.get(c)))
+P = pd.DataFrame(P)
+P.to_csv(f'{OUT}/low_dice_BUSI_percase.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+W = W.sort_values(['nine', 'baseline_dice'], ascending=[False, True])
+W.index.name = 'case'
+W.to_csv(f'{OUT}/low_dice_BUSI_wide.csv', float_format='%.4f', encoding='utf-8-sig')
+L = []
+for m, g in P.groupby('model', sort=False):
+    for grp, sel in [('low_dice', g), ('nine', g[g.nine == 'yes']), ('low_other', g[g.nine == 'no'])]:
+        dd = (sel.after_model - sel.before_control).to_numpy()
+        L.append(dict(model=m, control='busi_UKAN_base2', group=grp, n=len(sel), before_control=sel.before_control.mean(),
+                      after_model=sel.after_model.mean(), delta=dd.mean(), n_up=int((dd > 0).sum()), n_down=int((dd < 0).sum()),
+                      n_above_05=int((sel.after_model >= 0.5).sum()), wilcoxon_p=pval(dd)))
+L = pd.DataFrame(L)
+L['wilcoxon_p'] = L.wilcoxon_p.map(lambda v: '' if pd.isna(v) else (f'{v:.1e}' if v < 0.001 else f'{v:.4f}'))
+L.to_csv(f'{OUT}/low_dice_BUSI_summary.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
 
 # 擾動測試摘要（方向 / 正負合併）
 for kind, extra in [('perturb', {}), ('sweep', {'prob_gt_mean': ('prob_gt', 'mean')})]:
