@@ -146,6 +146,25 @@ Dropout 也沒有改善對平移的敏感：一般訓練影像平移 12 px 時�
 
 每個模型相對 base2 的平均前後（low_dice 15 張、nine 9 張、low_other 6 張）：[low_dice_BUSI_summary.csv](results/analysis/low_dice_BUSI_summary.csv)；逐張前後：[low_dice_BUSI_percase.csv](results/analysis/low_dice_BUSI_percase.csv)。
 
+### 7.1 低分但不在那 9 張的 6 張
+
+沒有任何模型能整體提升這 6 張：13 個模型相對 base2 的平均變化在 −0.065 到 +0.096 之間，p 全部 > 0.2；光是 base2 重訓成 base3 就差 −0.065。
+
+每張影像在 13 個模型的情況（[low_other_BUSI_case_summary.csv](results/analysis/low_other_BUSI_case_summary.csv)，前 = base2）：
+
+| 影像 | base2 | base3 | 13 個模型平均 | 最低–最高 | 升 / 降（模型數） | 解讀 |
+|---|---|---|---|---|---|---|
+| `benign (353)` | 0.65 | 0.28 | 0.84 | 0.28–0.92 | 12 / 1 | 被改善：所有平移增強模型都約 0.87–0.92 |
+| `benign (408)` | 0.27 | 0.33 | 0.30 | 0.04–0.78 | 6 / 7 | 雜訊：每次訓練差很多，沒有固定方向 |
+| `malignant (116)` | 0.23 | 0.23 | 0.24 | 0.22–0.26 | 6 / 7 | 不動：所有模型都約 0.23 |
+| `benign (299)` | 0.26 | 0.27 | 0.26 | 0.24–0.28 | 7 / 6 | 不動：所有模型都約 0.26 |
+| `benign (131)` | 0.45 | 0.47 | 0.45 | 0.42–0.50 | 4 / 9 | 不動：所有模型都約 0.45 |
+| `benign (315)` | 0.82 | 0.71 | 0.66 | 0.50–0.89 | 1 / 12 | 變差：平移增強模型降到 0.50–0.67 |
+
+- 每個模型的平均前後：[low_other_BUSI_summary.csv](results/analysis/low_other_BUSI_summary.csv)
+- 逐張前後：[low_other_BUSI_percase.csv](results/analysis/low_other_BUSI_percase.csv)
+- 一張一列、每個模型一欄：[low_other_BUSI_wide.csv](results/analysis/low_other_BUSI_wide.csv)
+
 ## CSV 欄位（以實際一列說明）
 
 - `aug_BUSI_models.csv`：`busi_UKAN_shift,517,flip+rot90 + shift32,0.0000,none,130,0.8184,0.8949,0.2326,0.0889,no,0.9389,0.1204` = 模型、訓練張數、資料增強、Dropout、Ψ 加權、測試張數、測試集、一般、低分、那 9 張、9 張是否在訓練集、訓練集、差距。
@@ -153,6 +172,7 @@ Dropout 也沒有改善對平移的敏感：一般訓練影像平移 12 px 時�
 - `aug_BUSI_percase.csv`：`noise_noaug,busi_UKAN_base2,busi_UKAN_base3,benign (116),test,yes,yes,0.0000,0.0000,0.0000` = 比較、對照、模型、影像、所在切分、是否低分、是否那 9 張、對照 Dice、模型 Dice、Δ。
 - `low_dice_BUSI_percase.csv`：`busi_UKAN_base3,benign (223),test,yes,0.0289,0.0100,0.0000,-0.0100` = 模型、影像、該模型中這張在測試集還是訓練集、是否那 9 張、baseline Dice、對照組 base2 的 Dice、該模型的 Dice、差。
 - `low_dice_BUSI_summary.csv`：每個模型一組三列（low_dice、nine、low_other），欄位同 aug_BUSI_summary，另有 `n_above_05` = 該模型 Dice ≥ 0.5 的張數。
+- `low_other_BUSI_case_summary.csv`：`benign (353),0.1256,0.6494,0.2837,13,0.8414,0.2837,0.9176,0.6340,0.1921,12,1,12` = 影像、baseline Dice、base2、base3、模型數、13 個模型的平均 / 最低 / 最高 / 最高−最低、相對 base2 的平均變化、比 base2 高的模型數、比 base2 低的模型數、Dice ≥ 0.5 的模型數。`low_other_BUSI_percase.csv`、`_wide.csv`、`_summary.csv` 的欄位同 low_dice 的對應檔。
 - `perturb_BUSI_percase.csv`：`busi_UKAN_moved,nine,malignant (198),rotate,1,10,+,0.0303,7572,5241` = 模型、組別、影像、變化、強度（1 輕 / 2 中 / 3 重）、數值、方向、Dice、預測像素、標註像素。`sweep_BUSI_percase.csv` 另有 `prob_gt`（標註區域內的平均預測機率）。
 
 ## 重新產生分析

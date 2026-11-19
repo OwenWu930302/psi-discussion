@@ -9,6 +9,7 @@ BUSI 討論實驗的分析：逐張結果（last）→ busi/results/analysis/（
   aug_BUSI_summary.csv   成對比較（control → model），各組的前後變化與 Wilcoxon
   aug_BUSI_percase.csv   成對比較的逐張前後（測試集 130 張；搬移比較另含那 9 張）
   low_dice_BUSI_percase.csv、low_dice_BUSI_wide.csv、low_dice_BUSI_summary.csv  低分 15 張每個模型逐張的前後
+  low_other_BUSI_percase.csv、_wide.csv、_summary.csv、_case_summary.csv  其中不在那 9 張的 6 張，單獨整理
   perturb_BUSI_summary.csv、sweep_BUSI_summary.csv、shift_sweep_BUSI.png
 組別（以官方原始切分定義）：all 130、other 115、low_dice 15（baseline seed2981 best 的 Dice < 0.5）、
   nine 9（moved_busi_dice02.csv）、train 517（原訓練集）；搬移模型的測試集只剩 121 張（remaining）
@@ -140,6 +141,24 @@ for m, g in P.groupby('model', sort=False):
 L = pd.DataFrame(L)
 L['wilcoxon_p'] = L.wilcoxon_p.map(lambda v: '' if pd.isna(v) else (f'{v:.1e}' if v < 0.001 else f'{v:.4f}'))
 L.to_csv(f'{OUT}/low_dice_BUSI_summary.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+
+# 低分但不在那 9 張的 6 張（low_other）：單獨整理
+#   low_other_BUSI_percase.csv       一個模型 × 一張影像一列（before = base2，after = 該模型）
+#   low_other_BUSI_wide.csv          一張影像一列、每個模型一欄
+#   low_other_BUSI_summary.csv       每個模型一列：6 張的平均前後、升降、Dice ≥ 0.5 張數、Wilcoxon
+#   low_other_BUSI_case_summary.csv  每張影像一列：base2、base3、13 個模型的平均 / 最低 / 最高、升降模型數
+O = P[P.nine == 'no'].drop(columns=['nine'])
+O.to_csv(f'{OUT}/low_other_BUSI_percase.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+W[W.nine == 'no'].drop(columns=['nine']).to_csv(f'{OUT}/low_other_BUSI_wide.csv', float_format='%.4f', encoding='utf-8-sig')
+L[L.group == 'low_other'].drop(columns=['group']).to_csv(f'{OUT}/low_other_BUSI_summary.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
+C = []
+for c, g in O.groupby('case', sort=False):
+    C.append(dict(case=c, baseline_dice=g.baseline_dice.iloc[0], base2=g.before_control.iloc[0], base3=M['base3'].get(c),
+                  n_models=len(g), after_mean=g.after_model.mean(), after_min=g.after_model.min(), after_max=g.after_model.max(),
+                  after_range=g.after_model.max() - g.after_model.min(), delta_mean=g.delta.mean(),
+                  n_up=int((g.delta > 0).sum()), n_down=int((g.delta < 0).sum()), n_above_05=int((g.after_model >= 0.5).sum())))
+pd.DataFrame(C).sort_values('delta_mean', ascending=False).to_csv(f'{OUT}/low_other_BUSI_case_summary.csv', index=False,
+                                                                  float_format='%.4f', encoding='utf-8-sig')
 
 # 擾動測試摘要（方向 / 正負合併）
 for kind, extra in [('perturb', {}), ('sweep', {'prob_gt_mean': ('prob_gt', 'mean')})]:
