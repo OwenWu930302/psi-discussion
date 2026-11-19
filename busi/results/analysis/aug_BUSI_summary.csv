@@ -104,6 +104,16 @@ shift_drop3,busi_UKAN_shift_r2,busi_UKAN_shift_drop3,other,115,0.8953,0.8932,-0.
 shift_drop3,busi_UKAN_shift_r2,busi_UKAN_shift_drop3,low_dice,15,0.2251,0.2378,0.0127,5,7,0.9375
 shift_drop3,busi_UKAN_shift_r2,busi_UKAN_shift_drop3,nine,9,0.0698,0.1100,0.0402,3,3,0.6875
 shift_drop3,busi_UKAN_shift_r2,busi_UKAN_shift_drop3,train,517,0.9356,0.9337,-0.0019,232,285,6.5e-04
+speckle,busi_UKAN_base2,busi_UKAN_speckle,all,130,0.7818,0.7948,0.0129,63,63,0.5387
+speckle,busi_UKAN_base2,busi_UKAN_speckle,other,115,0.8604,0.8651,0.0048,55,60,0.8539
+speckle,busi_UKAN_base2,busi_UKAN_speckle,low_dice,15,0.1799,0.2552,0.0753,8,3,0.0164
+speckle,busi_UKAN_base2,busi_UKAN_speckle,nine,9,0.0026,0.1140,0.1113,4,1,0.1250
+speckle,busi_UKAN_base2,busi_UKAN_speckle,train,517,0.9659,0.9641,-0.0018,203,313,3.6e-10
+speckle,busi_UKAN_base3,busi_UKAN_speckle,all,130,0.7912,0.7948,0.0035,63,63,0.8313
+speckle,busi_UKAN_base3,busi_UKAN_speckle,other,115,0.8741,0.8651,-0.0090,57,58,0.7567
+speckle,busi_UKAN_base3,busi_UKAN_speckle,low_dice,15,0.1556,0.2552,0.0996,6,5,0.1307
+speckle,busi_UKAN_base3,busi_UKAN_speckle,nine,9,0.0055,0.1140,0.1085,4,1,0.1875
+speckle,busi_UKAN_base3,busi_UKAN_speckle,train,517,0.9666,0.9641,-0.0024,213,304,2.3e-07
 moved_noaug,busi_UKAN_base2,busi_UKAN_moved,nine,9,0.0026,0.9622,0.9595,9,0,0.0039
 moved_noaug,busi_UKAN_base2,busi_UKAN_moved,remaining,121,0.8398,0.8373,-0.0025,55,66,0.6932
 moved_noaug,busi_UKAN_base2,busi_UKAN_moved,train,517,0.9659,0.9675,0.0016,264,253,0.1731

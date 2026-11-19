@@ -39,6 +39,7 @@ MODELS = [('base2', 517, OFF, 0, 'none'), ('base3', 517, OFF, 0, 'none'), ('psi8
           ('ssr_int', 517, SSR + ' + intensity20', 0, 'none'), ('psi8w3n_shift', 517, SH, 0, 'psi8 x3'),
           ('drop1', 517, OFF, 0.1, 'none'), ('drop3', 517, OFF, 0.3, 'none'),
           ('shift_drop1', 517, SH, 0.1, 'none'), ('shift_drop3', 517, SH, 0.3, 'none'),
+          ('drop3_r2', 517, OFF, 0.3, 'none'), ('speckle', 517, OFF + ' + speckle10', 0, 'none'),
           ('moved', 526, OFF, 0, 'none'), ('shift_moved', 526, SH, 0, 'none')]
 COMPS = [('noise_noaug', 'base2', 'base3'), ('noise_shift', 'shift', 'shift_r2'),
          ('shift', 'base2', 'shift'), ('shift', 'base3', 'shift'), ('shift_r2', 'base2', 'shift_r2'), ('shift_r2', 'base3', 'shift_r2'),
@@ -48,6 +49,8 @@ COMPS = [('noise_noaug', 'base2', 'base3'), ('noise_shift', 'shift', 'shift_r2')
          ('drop1', 'base2', 'drop1'), ('drop1', 'base3', 'drop1'), ('drop3', 'base2', 'drop3'), ('drop3', 'base3', 'drop3'),
          ('shift_drop1', 'shift', 'shift_drop1'), ('shift_drop1', 'shift_r2', 'shift_drop1'),
          ('shift_drop3', 'shift', 'shift_drop3'), ('shift_drop3', 'shift_r2', 'shift_drop3'),
+         ('noise_drop3', 'drop3', 'drop3_r2'), ('drop3_r2', 'base2', 'drop3_r2'), ('drop3_r2', 'base3', 'drop3_r2'),
+         ('speckle', 'base2', 'speckle'), ('speckle', 'base3', 'speckle'),
          ('moved_noaug', 'base2', 'moved'), ('moved_shift', 'shift', 'shift_moved'), ('moved_shift', 'moved', 'shift_moved')]
 
 
@@ -146,14 +149,14 @@ L.to_csv(f'{OUT}/low_dice_BUSI_summary.csv', index=False, float_format='%.4f', e
 #   low_other_BUSI_percase.csv       一個模型 × 一張影像一列（before = base2，after = 該模型）
 #   low_other_BUSI_wide.csv          一張影像一列、每個模型一欄
 #   low_other_BUSI_summary.csv       每個模型一列：6 張的平均前後、升降、Dice ≥ 0.5 張數、Wilcoxon
-#   low_other_BUSI_case_summary.csv  每張影像一列：base2、base3、13 個模型的平均 / 最低 / 最高、升降模型數
+#   low_other_BUSI_case_summary.csv  每張影像一列：baseline（best）、base2、base3（last）、13 個模型的平均 / 最低 / 最高、升降模型數
 O = P[P.nine == 'no'].drop(columns=['nine'])
 O.to_csv(f'{OUT}/low_other_BUSI_percase.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
 W[W.nine == 'no'].drop(columns=['nine']).to_csv(f'{OUT}/low_other_BUSI_wide.csv', float_format='%.4f', encoding='utf-8-sig')
 L[L.group == 'low_other'].drop(columns=['group']).to_csv(f'{OUT}/low_other_BUSI_summary.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
 C = []
 for c, g in O.groupby('case', sort=False):
-    C.append(dict(case=c, baseline_dice=g.baseline_dice.iloc[0], base2=g.before_control.iloc[0], base3=M['base3'].get(c),
+    C.append(dict(case=c, baseline_best=g.baseline_dice.iloc[0], base2_last=g.before_control.iloc[0], base3_last=M['base3'].get(c) if 'base3' in M else np.nan,
                   n_models=len(g), after_mean=g.after_model.mean(), after_min=g.after_model.min(), after_max=g.after_model.max(),
                   after_range=g.after_model.max() - g.after_model.min(), delta_mean=g.delta.mean(),
                   n_up=int((g.delta > 0).sum()), n_down=int((g.delta < 0).sum()), n_above_05=int((g.after_model >= 0.5).sum())))

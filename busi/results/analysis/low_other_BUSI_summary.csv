@@ -10,5 +10,6 @@ busi_UKAN_drop1,busi_UKAN_base2,6,0.4457,0.5169,0.0712,3,3,3,0.5625
 busi_UKAN_drop3,busi_UKAN_base2,6,0.4457,0.5092,0.0635,5,1,2,0.2188
 busi_UKAN_shift_drop1,busi_UKAN_base2,6,0.4457,0.3965,-0.0492,2,4,2,0.4375
 busi_UKAN_shift_drop3,busi_UKAN_base2,6,0.4457,0.4296,-0.0161,3,3,2,1.0000
+busi_UKAN_speckle,busi_UKAN_base2,6,0.4457,0.4669,0.0212,4,2,2,0.1562
 busi_UKAN_moved,busi_UKAN_base2,6,0.4457,0.5416,0.0959,2,4,3,1.0000
 busi_UKAN_shift_moved,busi_UKAN_base2,6,0.4457,0.4419,-0.0038,2,4,2,0.8438
