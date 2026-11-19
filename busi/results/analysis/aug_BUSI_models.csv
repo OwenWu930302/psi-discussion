@@ -1,16 +1,16 @@
-﻿model,train_images,augmentation,dropout,psi_weight,n_test,test_all,test_other,test_low_dice,nine,nine_in_train,train_all,gap
-busi_UKAN_base2,517,flip+rot90,0.0000,none,130,0.7818,0.8604,0.1799,0.0026,no,0.9659,0.1841
-busi_UKAN_base3,517,flip+rot90,0.0000,none,130,0.7912,0.8741,0.1556,0.0055,no,0.9666,0.1754
-busi_UKAN_psi8w3n,517,flip+rot90,0.0000,psi8 x3,130,0.8040,0.8824,0.2032,0.0158,no,0.9592,0.1552
-busi_UKAN_shift,517,flip+rot90 + shift32,0.0000,none,130,0.8184,0.8949,0.2326,0.0889,no,0.9389,0.1204
-busi_UKAN_shift_r2,517,flip+rot90 + shift32,0.0000,none,130,0.8179,0.8953,0.2251,0.0698,no,0.9356,0.1177
-busi_UKAN_ssr,517,flip+rot90 + shift32 + scale10 + rotate15,0.0000,none,130,0.8220,0.9020,0.2086,0.0625,no,0.9289,0.1069
-busi_UKAN_ssr_int,517,flip+rot90 + shift32 + scale10 + rotate15 + intensity20,0.0000,none,130,0.8181,0.8943,0.2338,0.0701,no,0.9260,0.1079
-busi_UKAN_psi8w3n_shift,517,flip+rot90 + shift32,0.0000,psi8 x3,130,0.8102,0.8916,0.1859,0.0222,no,0.9279,0.1177
-busi_UKAN_drop1,517,flip+rot90,0.1000,none,130,0.7933,0.8698,0.2068,0.0000,no,0.9650,0.1717
-busi_UKAN_drop3,517,flip+rot90,0.3000,none,130,0.7965,0.8692,0.2385,0.0580,no,0.9591,0.1626
-busi_UKAN_shift_drop1,517,flip+rot90 + shift32,0.1000,none,130,0.8150,0.8946,0.2044,0.0764,no,0.9354,0.1204
-busi_UKAN_shift_drop3,517,flip+rot90 + shift32,0.3000,none,130,0.8176,0.8932,0.2378,0.1100,no,0.9337,0.1161
-busi_UKAN_speckle,517,flip+rot90 + speckle10,0.0000,none,130,0.7948,0.8651,0.2552,0.1140,no,0.9641,0.1694
-busi_UKAN_moved,526,flip+rot90,0.0000,none,121,0.8373,0.8528,0.5416,0.9622,yes,0.9675,0.1302
-busi_UKAN_shift_moved,526,flip+rot90 + shift32,0.0000,none,121,0.8722,0.8947,0.4419,0.7893,yes,0.9358,0.0636
+﻿category,model,main,train_name,train_images,augmentation,dropout,psi_weight,n_test,test_all,test_other,test_low_dice,nine,nine_in_train,train_all,gap
+control,busi_UKAN_base2,yes,busi_UKAN_base2,517,flip+rot90,0.0000,none,130,0.7818,0.8604,0.1799,0.0026,no,0.9659,0.1841
+control,busi_UKAN_base3,yes,busi_UKAN_base3,517,flip+rot90,0.0000,none,130,0.7912,0.8741,0.1556,0.0055,no,0.9666,0.1754
+moved,busi_UKAN_moved,yes,busi_UKAN_moved,526,flip+rot90,0.0000,none,121,0.8373,0.8528,0.5416,0.9622,yes,0.9675,0.1302
+moved,busi_UKAN_shift_moved,no,busi_UKAN_shift_moved,526,flip+rot90 + shift32,0.0000,none,121,0.8722,0.8947,0.4419,0.7893,yes,0.9358,0.0636
+augmentation,busi_UKAN_shift,yes,busi_UKAN_shift,517,flip+rot90 + shift32,0.0000,none,130,0.8184,0.8949,0.2326,0.0889,no,0.9389,0.1204
+augmentation,busi_UKAN_shift_r2,yes,busi_UKAN_shift_r2,517,flip+rot90 + shift32,0.0000,none,130,0.8179,0.8953,0.2251,0.0698,no,0.9356,0.1177
+augmentation,busi_UKAN_ssr,no,busi_UKAN_ssr,517,flip+rot90 + shift32 + scale10 + rotate15,0.0000,none,130,0.8220,0.9020,0.2086,0.0625,no,0.9289,0.1069
+augmentation,busi_UKAN_ssr_int,no,busi_UKAN_ssr_int,517,flip+rot90 + shift32 + scale10 + rotate15 + intensity20,0.0000,none,130,0.8181,0.8943,0.2338,0.0701,no,0.9260,0.1079
+regularization,busi_UKAN_drop10,yes,busi_UKAN_drop1,517,flip+rot90,0.1000,none,130,0.7933,0.8698,0.2068,0.0000,no,0.9650,0.1717
+regularization,busi_UKAN_drop30,yes,busi_UKAN_drop3,517,flip+rot90,0.3000,none,130,0.7965,0.8692,0.2385,0.0580,no,0.9591,0.1626
+regularization,busi_UKAN_speckle,yes,busi_UKAN_speckle,517,flip+rot90 + speckle10,0.0000,none,130,0.7948,0.8651,0.2552,0.1140,no,0.9641,0.1694
+combination,busi_UKAN_shift_drop10,no,busi_UKAN_shift_drop1,517,flip+rot90 + shift32,0.1000,none,130,0.8150,0.8946,0.2044,0.0764,no,0.9354,0.1204
+combination,busi_UKAN_shift_drop30,no,busi_UKAN_shift_drop3,517,flip+rot90 + shift32,0.3000,none,130,0.8176,0.8932,0.2378,0.1100,no,0.9337,0.1161
+psi_weighting,busi_UKAN_psi8w3n,no,busi_UKAN_psi8w3n,517,flip+rot90,0.0000,psi8 x3,130,0.8040,0.8824,0.2032,0.0158,no,0.9592,0.1552
+psi_weighting,busi_UKAN_psi8w3n_shift,no,busi_UKAN_psi8w3n_shift,517,flip+rot90 + shift32,0.0000,psi8 x3,130,0.8102,0.8916,0.1859,0.0222,no,0.9279,0.1177
