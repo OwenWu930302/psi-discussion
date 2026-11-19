@@ -1,4 +1,4 @@
-﻿case,baseline_dice,base2,base3,n_models,after_mean,after_min,after_max,after_range,delta_mean,n_up,n_down,n_above_05
+﻿case,baseline_best,base2,base3,n_models,after_mean,after_min,after_max,after_range,delta_mean,n_up,n_down,n_above_05
 benign (353),0.1256,0.6494,0.2837,13,0.8414,0.2837,0.9176,0.6340,0.1921,12,1,12
 benign (408),0.2547,0.2668,0.3249,13,0.3041,0.0410,0.7751,0.7341,0.0372,6,7,2
 malignant (116),0.2433,0.2315,0.2293,13,0.2369,0.2220,0.2630,0.0410,0.0053,6,7,0
