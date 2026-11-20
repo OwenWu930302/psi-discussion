@@ -9,6 +9,7 @@ augmentation,busi_UKAN_ssr,no,busi_UKAN_ssr,517,flip+rot90 + shift32 + scale10 +
 augmentation,busi_UKAN_ssr_int,no,busi_UKAN_ssr_int,517,flip+rot90 + shift32 + scale10 + rotate15 + intensity20,0.0000,none,130,0.8181,0.8943,0.2338,0.0701,no,0.9260,0.1079
 regularization,busi_UKAN_drop10,yes,busi_UKAN_drop1,517,flip+rot90,0.1000,none,130,0.7933,0.8698,0.2068,0.0000,no,0.9650,0.1717
 regularization,busi_UKAN_drop30,yes,busi_UKAN_drop3,517,flip+rot90,0.3000,none,130,0.7965,0.8692,0.2385,0.0580,no,0.9591,0.1626
+regularization,busi_UKAN_drop30_r2,no,busi_UKAN_drop3_r2,517,flip+rot90,0.3000,none,130,0.7802,0.8591,0.1752,0.0012,no,0.9636,0.1834
 regularization,busi_UKAN_speckle,yes,busi_UKAN_speckle,517,flip+rot90 + speckle10,0.0000,none,130,0.7948,0.8651,0.2552,0.1140,no,0.9641,0.1694
 combination,busi_UKAN_shift_drop10,no,busi_UKAN_shift_drop1,517,flip+rot90 + shift32,0.1000,none,130,0.8150,0.8946,0.2044,0.0764,no,0.9354,0.1204
 combination,busi_UKAN_shift_drop30,no,busi_UKAN_shift_drop3,517,flip+rot90 + shift32,0.3000,none,130,0.8176,0.8932,0.2378,0.1100,no,0.9337,0.1161

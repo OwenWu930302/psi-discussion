@@ -26,6 +26,9 @@ regularization,busi_UKAN_drop10,busi_UKAN_base2,low_other,6,0.4457,0.5169,0.0712
 regularization,busi_UKAN_drop30,busi_UKAN_base2,low_dice,15,0.1799,0.2385,0.0586,7,2,2,0.1097
 regularization,busi_UKAN_drop30,busi_UKAN_base2,nine,9,0.0026,0.0580,0.0554,2,1,0,0.5000
 regularization,busi_UKAN_drop30,busi_UKAN_base2,low_other,6,0.4457,0.5092,0.0635,5,1,2,0.2188
+regularization,busi_UKAN_drop30_r2,busi_UKAN_base2,low_dice,15,0.1799,0.1752,-0.0046,4,5,1,0.8590
+regularization,busi_UKAN_drop30_r2,busi_UKAN_base2,nine,9,0.0026,0.0012,-0.0014,1,2,0,0.7500
+regularization,busi_UKAN_drop30_r2,busi_UKAN_base2,low_other,6,0.4457,0.4362,-0.0095,3,3,1,1.0000
 regularization,busi_UKAN_speckle,busi_UKAN_base2,low_dice,15,0.1799,0.2552,0.0753,8,3,3,0.0164
 regularization,busi_UKAN_speckle,busi_UKAN_base2,nine,9,0.0026,0.1140,0.1113,4,1,1,0.1250
 regularization,busi_UKAN_speckle,busi_UKAN_base2,low_other,6,0.4457,0.4669,0.0212,4,2,2,0.1562

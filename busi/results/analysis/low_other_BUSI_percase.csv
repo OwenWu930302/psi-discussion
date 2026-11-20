@@ -53,6 +53,12 @@ busi_UKAN_drop30,benign (315),test,0.4100,0.8210,0.7427,-0.0783
 busi_UKAN_drop30,benign (299),test,0.1713,0.2563,0.2624,0.0060
 busi_UKAN_drop30,benign (408),test,0.2547,0.2668,0.4337,0.1668
 busi_UKAN_drop30,malignant (116),test,0.2433,0.2315,0.2411,0.0096
+busi_UKAN_drop30_r2,benign (131),test,0.4813,0.4490,0.4688,0.0198
+busi_UKAN_drop30_r2,benign (353),test,0.1256,0.6494,0.3490,-0.3004
+busi_UKAN_drop30_r2,benign (315),test,0.4100,0.8210,0.8190,-0.0020
+busi_UKAN_drop30_r2,benign (299),test,0.1713,0.2563,0.2649,0.0086
+busi_UKAN_drop30_r2,benign (408),test,0.2547,0.2668,0.4979,0.2310
+busi_UKAN_drop30_r2,malignant (116),test,0.2433,0.2315,0.2176,-0.0140
 busi_UKAN_speckle,benign (131),test,0.4813,0.4490,0.4666,0.0176
 busi_UKAN_speckle,benign (353),test,0.1256,0.6494,0.6797,0.0304
 busi_UKAN_speckle,benign (315),test,0.4100,0.8210,0.8625,0.0416
