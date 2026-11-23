@@ -54,6 +54,7 @@ from scipy.stats import rankdata
 # ----------------------------------------------------------------------------
 # basic metrics
 # ----------------------------------------------------------------------------
+# [註解] Dice = 2|A∩B| / (|A|+|B|)，兩個二值遮罩的重疊程度（0–1）。
 def dice(a, b, eps=1e-8):
     a = np.asarray(a).astype(bool)
     b = np.asarray(b).astype(bool)
@@ -63,6 +64,9 @@ def dice(a, b, eps=1e-8):
 # ----------------------------------------------------------------------------
 # 1. candidates and recall@k
 # ----------------------------------------------------------------------------
+# [註解] 第 1 部分：腫瘤找不找得到。
+# [註解] 候選 = 機率 > cand_thr（0.2）的連通區塊，依 score（預設區塊內最高機率）由高到低排名；
+# [註解] 回傳第一個蓋到 ≥ hit_frac（30%）標註面積的候選名次（從 1 起算），都沒有則回傳 ∞。
 def gt_rank(prob, gt, cand_thr=0.2, score="max", hit_frac=0.3):
     """1-based rank of the first candidate region that covers >= hit_frac of the GT area.
 
@@ -86,11 +90,15 @@ def gt_rank(prob, gt, cand_thr=0.2, score="max", hit_frac=0.3):
     return np.inf
 
 
+# [註解] 前 k 名候選內找得到腫瘤的比例（名次 ≤ k 的影像比例），k = 1、2、3、5。
 def recall_at_k(ranks, ks=(1, 2, 3, 5)):
     ranks = np.asarray(ranks, dtype=float)
     return {int(k): float(np.mean(ranks <= k)) if len(ranks) else float("nan") for k in ks}
 
 
+# [註解] 失敗（Dice < delta）影像的類型：
+# [註解]   名次 1 → delineation（位置對、範圍錯）；名次 ≥ 2 → wrong-choice（選錯區塊）；
+# [註解]   名次 ∞ → missed（候選中沒有腫瘤）；不是失敗 → ok。
 def failure_type(rank, is_failure):
     if not is_failure:
         return "ok"
@@ -102,6 +110,12 @@ def failure_type(rank, is_failure):
 # ----------------------------------------------------------------------------
 # 2. gradient alignment (Prop. C1)
 # ----------------------------------------------------------------------------
+# [註解] 第 2 部分：梯度對齊（加權訓練能不能幫到這張測試影像）。
+# [註解] g_eval：測試影像的梯度（每張一列）；g_flag：加權清單的梯度；w：權重（預設 1）。
+# [註解] rho_max = 與清單中最像單張的 cos；nn_index = 最像的是清單第幾張；
+# [註解] G = Σ w_i g_i；rho_G = cos(g_x, G)；A = <g_x, G>，A > 0 表示朝 G 走一小步這張的 loss 會下降；
+# [註解] gain_x_M = A^2 / (2||G||^2)（只在 A > 0 時），最佳步長下保證的 loss 下降量（再除以 M）；
+# [註解] coverage = Σ w_i ||g_i|| cos(g_x, g_i)，清單整體對這張的覆蓋程度。
 def alignment(g_eval, g_flag, w=None):
     """Alignment of evaluation-case gradients with flagged-training-failure gradients.
 
@@ -130,6 +144,8 @@ def alignment(g_eval, g_flag, w=None):
 # ----------------------------------------------------------------------------
 # 3. flag quality (AUROC, threshold stats, detection ceiling)
 # ----------------------------------------------------------------------------
+# [註解] 第 3 部分：Ψ 偵測失敗的能力。
+# [註解] AUROC（Mann-Whitney 排名法）：隨機挑一張失敗與一張非失敗，失敗分數較高的機率。
 def auroc(score, label):
     """Mann-Whitney AUROC with mid-ranks. Higher score = more likely failure."""
     s = np.asarray(score, float)
@@ -141,6 +157,7 @@ def auroc(score, label):
     return float((r[y].sum() - n1 * (n1 + 1) / 2.0) / (n1 * n0))
 
 
+# [註解] AUROC 的 95% 信賴區間：失敗、非失敗兩組各自重抽 B（1,000）次 bootstrap，取 2.5% 與 97.5% 分位數。
 def auroc_ci(score, label, B=1000, alpha=0.05, seed=0):
     rng = np.random.default_rng(seed)
     s = np.asarray(score, float)
@@ -155,6 +172,7 @@ def auroc_ci(score, label, B=1000, alpha=0.05, seed=0):
     return tuple(float(v) for v in np.quantile(vals, [alpha / 2, 1 - alpha / 2]))
 
 
+# [註解] 門檻 tau 下（分數 > tau 即標記）的 TPR（抓到的失敗比例）、FPR（誤報率）、precision、標記張數。
 def flag_stats(score, label, tau):
     s = np.asarray(score, float)
     y = np.asarray(label).astype(bool)
@@ -165,6 +183,7 @@ def flag_stats(score, label, tau):
                 precision=tp / max(tp + fp, 1), n_flagged=int(f.sum()))
 
 
+# [註解] 沒給門檻時用：在同一份資料上找 TPR − FPR 最大的門檻（會偏樂觀）。
 def youden_tau(score, label):
     """Threshold maximizing TPR-FPR on THIS data (optimistic; use validation data)."""
     s = np.asarray(score, float)
@@ -179,6 +198,9 @@ def youden_tau(score, label):
 # ----------------------------------------------------------------------------
 # optional PyTorch helper for per-case gradients (needs torch; not used by the CLI selftest)
 # ----------------------------------------------------------------------------
+# [註解] PyTorch 輔助：逐張影像算 loss 對指定參數的梯度並攤平成一列。
+# [註解] param_filter 選參數；沒給時用最後 last_n（2）個參數張量。proj_dim 可用隨機投影降維。
+# [註解] 回傳 (影像數, 參數數) 的陣列，給 analyse 的 grads_eval / grads_flag / grads_ctrl 使用。
 def extract_grads(model, loss_fn, loader, device="cuda", param_filter=None, last_n=2,
                   proj_dim=None, seed=0):
     """Per-case flattened gradients of the loss w.r.t. a subset of parameters.
@@ -218,6 +240,12 @@ def extract_grads(model, loss_fn, loader, device="cuda", param_filter=None, last
 # ----------------------------------------------------------------------------
 # main analysis
 # ----------------------------------------------------------------------------
+# [註解] 主流程，依 npz 內有的資料執行三部分：
+# [註解]   1. 每張的 Dice、是否失敗、候選名次、失敗類型、標註內最高機率；recall@k；
+# [註解]   2. 有 grads_eval、grads_flag 時算梯度對齊；有 grads_ctrl 時從中隨機抽與清單同樣張數當對照（權重 1）；
+# [註解]   3. 有 features 時算每個 Ψ 的 AUROC、信賴區間、門檻統計、各失敗類型被抓到的比例；
+# [註解]      有 shape_features 時算偵測上限（形狀 Ψ 標到多少失敗、沒被標到的影像中各 Ψ 的 AUROC）。
+# [註解] 回傳 rows（每張一列的欄位）與 summary（彙總）。
 def analyse(d, delta=0.5, ks=(1, 2, 3, 5), cand_thr=0.2, score="max", hit_frac=0.3,
             taus=None, shape_features=None, gamma_over_delta=None, seed=0):
     taus = taus or {}
@@ -304,6 +332,7 @@ def analyse(d, delta=0.5, ks=(1, 2, 3, 5), cand_thr=0.2, score="max", hit_frac=0
     return rows, summary
 
 
+# [註解] 寫出 per_case.csv（每張一列）與 summary.json（彙總），並印出 summary。
 def _write_outputs(rows, summary, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     keys = list(rows.keys())
@@ -321,11 +350,15 @@ def _write_outputs(rows, summary, out_dir):
 # ----------------------------------------------------------------------------
 # self-test on synthetic data with known answers
 # ----------------------------------------------------------------------------
+# [註解] 自我測試用：在影像上畫半徑 r 的圓形區塊。
 def _blob(shape, c, r):
     yy, xx = np.ogrid[:shape[0], :shape[1]]
     return ((yy - c[0]) ** 2 + (xx - c[1]) ** 2) <= r * r
 
 
+# [註解] 自我測試用：產生答案已知的合成資料，
+# [註解]   候選名次事先設定（1、2、3、∞）；一個有用的特徵、一個無用的特徵；
+# [註解]   一半測試影像的梯度與清單同方向、另一半正交；另有隨機對照梯度。
 def _synthetic(seed=0, n=240, hw=64, p=300, n_flag=30, sig=6.0):
     from scipy.stats import norm
     rng = np.random.default_rng(seed)
@@ -370,6 +403,7 @@ def _synthetic(seed=0, n=240, hw=64, p=300, n_flag=30, sig=6.0):
     return d, truth
 
 
+# [註解] 自我測試：用合成資料檢查 10 項結果是否等於預設答案，全部通過印出 SELFTEST PASSED。
 def selftest():
     d, t = _synthetic()
     rows, s = analyse(d, delta=0.5, taus={"informative": 0.5, "noise": 0.5})
@@ -408,6 +442,7 @@ def selftest():
     return 0 if ok else 1
 
 
+# [註解] 命令列入口：讀 --npz → analyse → 寫出 per_case.csv、summary.json；--selftest 則執行自我測試。
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--npz")
