@@ -235,6 +235,9 @@ Dropout 也沒有改善對平移的敏感：一般訓練影像平移 12 px 時�
 教授提供的 [failure_diagnostics.py](code/failure_diagnostics.py)（我們只加了以 `# [註解]` 開頭的中文註解，並刪掉第 1 行開頭多出的一個空格；程式本身逐字相同，自我測試仍全部 PASS）。測試集 130 張；機率圖由 [make_diag_npz.py](code/make_diag_npz.py) 產生，前處理與 predict_busi.py 相同；
 seed2981 = 產生 Ψ 與加權清單的 baseline，三部分都做；base2、shift 只做第 1 部分。執行：[run_diag.sh](code/run_diag.sh)。
 
+執行方法：python failure_diagnostics.py --npz outputs/diag/busi_UKAN_seed2981_best.npz --out-dir outputs/diag/seed2981_best --delta 0.5 --tau psi1_convex=1.0512699 --tau psi6_cc=0 --tau psi8_rotation=0.3315249 --shape-features psi1_convex psi6_cc 
+
+
 **執行流程**（Seg_UKAN 資料夾）：
 
 | 步驟 | 程式 | 做什麼 |
