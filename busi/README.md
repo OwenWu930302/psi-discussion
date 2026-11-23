@@ -232,7 +232,7 @@ Dropout 也沒有改善對平移的敏感：一般訓練影像平移 12 px 時�
 
 ## 8. 失敗診斷（failure_diagnostics.py）— [results/diagnostics/](results/diagnostics/)
 
-教授提供的 [failure_diagnostics.py](code/failure_diagnostics.py)（內容未改）。測試集 130 張；機率圖由 [make_diag_npz.py](code/make_diag_npz.py) 產生，前處理與 predict_busi.py 相同；
+教授提供的 [failure_diagnostics.py](code/failure_diagnostics.py)（我們只加了以 `# [註解]` 開頭的中文註解，並刪掉第 1 行開頭多出的一個空格；程式本身逐字相同，自我測試仍全部 PASS）。測試集 130 張；機率圖由 [make_diag_npz.py](code/make_diag_npz.py) 產生，前處理與 predict_busi.py 相同；
 seed2981 = 產生 Ψ 與加權清單的 baseline，三部分都做；base2、shift 只做第 1 部分。執行：[run_diag.sh](code/run_diag.sh)。
 
 **執行流程**（Seg_UKAN 資料夾）：
@@ -245,6 +245,25 @@ seed2981 = 產生 Ψ 與加權清單的 baseline，三部分都做；base2、shi
 | 3 | [name_cases.py](code/name_cases.py) | per_case.csv 的 `case` 原本是編號 0–129，換成影像名稱，並加上 `nine`（是否那 9 張） |
 
 梯度對齊的 4,721 維版本另外用 `make_diag_npz.py --params decoder5,final` 產生（[run_busi_group.sh](code/run_busi_group.sh) 第 0b 步）。
+
+**教授程式的函式**（我們用到的設定寫在括號內）：
+
+| 函式 | 作用 |
+|---|---|
+| `dice` | 兩個二值遮罩的 Dice |
+| `gt_rank` | 機率 > 0.2 的連通區塊當候選，依區塊內最高機率排名；回傳第一個蓋到 ≥ 30% 標註面積的候選名次，沒有則為 ∞ |
+| `recall_at_k` | 前 k 名候選內找得到腫瘤的比例（k = 1、2、3、5） |
+| `failure_type` | Dice < 0.5 的影像分類：第 1 名命中 = delineation、第 2 名以後命中 = wrong-choice、都沒命中 = missed |
+| `alignment` | 測試影像梯度 g_x 與加權清單梯度的對齊：rho_max（最像單張的 cos）、nn_index（最像的是哪張）、rho_G（與加權和 G 的 cos）、A = ⟨g_x, G⟩、gain_x_M = A²/(2‖G‖²)（A > 0 才算）、coverage |
+| `extract_grads` | PyTorch 輔助：逐張算 loss 對指定參數的梯度並攤平（預設最後 2 個參數張量 = U-KAN 的 `final`，17 維；我們另用 decoder5 + final；loss = 訓練時的 BCEDiceLoss；未用隨機投影） |
+| `auroc` | Mann-Whitney AUROC，分數越高越可能失敗 |
+| `auroc_ci` | 失敗、非失敗兩組分別 bootstrap 1,000 次的 95% 信賴區間 |
+| `flag_stats` | 門檻 τ（分數 > τ 即標記）下的 TPR、FPR、precision、標記張數 |
+| `youden_tau` | 未給門檻時在同一份資料上找 TPR − FPR 最大的門檻（偏樂觀；我們有給門檻，沒用到） |
+| `analyse` | 主流程：Dice、失敗、候選名次、失敗類型、標註內最高機率；有梯度時算對齊與對照（從對照影像抽與清單同樣張數）；有 Ψ 時算 AUROC、門檻統計、各失敗類型被抓到的比例；有 `--shape-features` 時算偵測上限（形狀 Ψ 標到多少失敗、未被標到的影像中其他 Ψ 的 AUROC） |
+| `_write_outputs` | 寫出 per_case.csv（每張一列）與 summary.json |
+| `_blob`、`_synthetic`、`selftest` | 產生答案已知的合成資料，檢查 10 項結果是否等於預設答案 |
+| `main` | 命令列入口：讀 .npz → `analyse` → 寫檔 |
 
 ### 8.1 候選區域與失敗類型
 
