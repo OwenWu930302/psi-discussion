@@ -5,7 +5,7 @@ BUSI 討論實驗的分析：逐張結果（last）→ busi/results/analysis/（
   本倉庫的模型                     ：busi/results/percase/busi_UKAN_<模型>_last.csv
   擾動測試逐張                     ：busi/results/analysis/perturb_BUSI_percase.csv、sweep_BUSI_percase.csv
 輸出
-  aug_BUSI_models.csv    每個模型一列（依類別排序）：類別、主要模型、訓練資料夾名稱、訓練張數、資料增強、Dropout、Ψ 加權、測試集各組、訓練集、差距
+  aug_BUSI_models.csv    每個模型一列（依類別排序）：類別、訓練資料夾名稱、訓練張數、資料增強、Dropout、Ψ 加權、測試集各組、訓練集、差距
   aug_BUSI_summary.csv   成對比較（control → model），各組的前後變化與 Wilcoxon
   aug_BUSI_percase.csv   成對比較的逐張前後（測試集 130 張；搬移比較另含那 9 張）
   low_dice_BUSI_percase.csv、low_dice_BUSI_wide.csv、low_dice_BUSI_summary.csv  低分 15 張每個模型逐張的前後
@@ -46,7 +46,6 @@ MODELS = [('control', 'base2', 517, OFF, 0, 'none'), ('control', 'base3', 517, O
           ('regularization', 'drop3_r2', 517, OFF, 0.3, 'none'), ('regularization', 'speckle', 517, OFF + ' + speckle10', 0, 'none'),
           ('combination', 'shift_drop1', 517, SH, 0.1, 'none'), ('combination', 'shift_drop3', 517, SH, 0.3, 'none'),
           ('psi_weighting', 'psi8w3n', 517, OFF, 0, 'psi8 x3'), ('psi_weighting', 'psi8w3n_shift', 517, SH, 0, 'psi8 x3')]
-MAIN = {'base2', 'base3', 'moved', 'shift', 'shift_r2', 'drop1', 'drop3', 'speckle'}   # 報告用的主要模型
 LABEL = {'drop1': 'drop10', 'drop3': 'drop30', 'drop3_r2': 'drop30_r2', 'shift_drop1': 'shift_drop10', 'shift_drop3': 'shift_drop30'}
 CAT = {k: c for c, k, *_ in MODELS}
 short = lambda k: LABEL.get(k, k)          # 表中顯示的名稱
@@ -90,7 +89,7 @@ for cat, name, ntr, aug, drop, psi in MODELS:
     if name not in M:
         continue
     d, t = M[name], (te.difference(nine) if ntr == 526 else te)
-    r = dict(category=cat, model=D(name), main='yes' if name in MAIN else 'no', train_name=f'busi_UKAN_{name}', train_images=ntr, augmentation=aug, dropout=drop, psi_weight=psi, n_test=len(t),
+    r = dict(category=cat, model=D(name), train_name=f'busi_UKAN_{name}', train_images=ntr, augmentation=aug, dropout=drop, psi_weight=psi, n_test=len(t),
              test_all=d.reindex(t).mean(), test_other=d.reindex(t.difference(low)).mean(),
              test_low_dice=d.reindex(t.intersection(low)).mean(), nine=d.reindex(nine).mean(),
              nine_in_train='yes' if ntr == 526 else 'no', train_all=d.reindex(tr).mean())
