@@ -235,6 +235,17 @@ Dropout 也沒有改善對平移的敏感：一般訓練影像平移 12 px 時�
 教授提供的 [failure_diagnostics.py](code/failure_diagnostics.py)（內容未改）。測試集 130 張；機率圖由 [make_diag_npz.py](code/make_diag_npz.py) 產生，前處理與 predict_busi.py 相同；
 seed2981 = 產生 Ψ 與加權清單的 baseline，三部分都做；base2、shift 只做第 1 部分。執行：[run_diag.sh](code/run_diag.sh)。
 
+**執行流程**（Seg_UKAN 資料夾）：
+
+| 步驟 | 程式 | 做什麼 |
+|---|---|---|
+| 0 | `failure_diagnostics.py --selftest` | 教授程式內建的合成資料測試，10 項全部 PASS：[selftest.txt](results/diagnostics/selftest.txt) |
+| 1 | [make_diag_npz.py](code/make_diag_npz.py) | 載入模型，對測試集 130 張輸出機率圖 `probs`、標註 `gts`、預測 `preds`；`--features` 加入 Ψ1、Ψ6、Ψ8；`--grads` 用教授的 `extract_grads` 與訓練時的 loss（BCEDiceLoss）算每張影像的梯度：測試 130 張、加權清單 155 張（權重 3）、其他訓練影像 362 張（對照）；存成 .npz |
+| 2 | `failure_diagnostics.py --npz … --delta 0.5 --tau … --shape-features psi1_convex psi6_cc` | 教授的程式，輸出 per_case.csv 與 summary.json |
+| 3 | [name_cases.py](code/name_cases.py) | per_case.csv 的 `case` 原本是編號 0–129，換成影像名稱，並加上 `nine`（是否那 9 張） |
+
+梯度對齊的 4,721 維版本另外用 `make_diag_npz.py --params decoder5,final` 產生（[run_busi_group.sh](code/run_busi_group.sh) 第 0b 步）。
+
 ### 8.1 候選區域與失敗類型
 
 候選 = 機率 > 0.2 的連通區塊，依區塊內最高機率排名；某候選蓋到 ≥ 30% 的標註面積才算命中。
@@ -266,7 +277,7 @@ delineation = 第 1 名候選就命中但 Dice 低；wrong-choice = 命中的是
 ### 8.3 梯度對齊（seed2981）
 
 測試失敗影像的梯度 g_x 與 Ψ8 加權清單（155 張訓練影像，權重 ×3）的梯度和 G 比較：rho_G = cos(g_x, G)，A = ⟨g_x, G⟩ > 0 表示朝 G 走一小步會降低這張的 loss。
-對照 = 隨機 362 張未加權訓練影像。用兩組參數各算一次：教授程式預設的輸出層 final（17 維），以及最後一個 decoder 加輸出層（decoder5 + final，4,721 維，`make_diag_npz.py --params decoder5,final`）。
+對照 = 從其他 362 張訓練影像中隨機抽 155 張（與加權清單同樣張數，權重 1；教授程式的做法）。用兩組參數各算一次：教授程式預設的輸出層 final（17 維），以及最後一個 decoder 加輸出層（decoder5 + final，4,721 維，`make_diag_npz.py --params decoder5,final`）。
 
 | | 17 維 rho_G | 17 維 A > 0 | 4,721 維 rho_G | 4,721 維 A > 0 |
 |---|---|---|---|---|
