@@ -235,9 +235,6 @@ Dropout 也沒有改善對平移的敏感：一般訓練影像平移 12 px 時�
 教授提供的 [failure_diagnostics.py](code/failure_diagnostics.py)（我們只加了以 `# [註解]` 開頭的中文註解，並刪掉第 1 行開頭多出的一個空格；程式本身逐字相同，自我測試仍全部 PASS）。測試集 130 張；機率圖由 [make_diag_npz.py](code/make_diag_npz.py) 產生，前處理與 predict_busi.py 相同；
 seed2981 = 產生 Ψ 與加權清單的 baseline，三部分都做；base2、shift 只做第 1 部分。執行：[run_diag.sh](code/run_diag.sh)。
 
-執行方法：python failure_diagnostics.py --npz outputs/diag/busi_UKAN_seed2981_best.npz --out-dir outputs/diag/seed2981_best --delta 0.5 --tau psi1_convex=1.0512699 --tau psi6_cc=0 --tau psi8_rotation=0.3315249 --shape-features psi1_convex psi6_cc 
-
-
 **執行流程**（Seg_UKAN 資料夾）：
 
 | 步驟 | 程式 | 做什麼 |
@@ -248,6 +245,47 @@ seed2981 = 產生 Ψ 與加權清單的 baseline，三部分都做；base2、shi
 | 3 | [name_cases.py](code/name_cases.py) | per_case.csv 的 `case` 原本是編號 0–129，換成影像名稱，並加上 `nine`（是否那 9 張） |
 
 梯度對齊的 4,721 維版本另外用 `make_diag_npz.py --params decoder5,final` 產生（[run_busi_group.sh](code/run_busi_group.sh) 第 0b 步）。
+
+**執行方法**（U-KAN 的 `Seg_UKAN` 資料夾、ukan 環境、需要 GPU；先把 `busi/code/` 的 failure_diagnostics.py、make_diag_npz.py、name_cases.py、run_diag.sh 複製到 Seg_UKAN）
+
+一次跑完（自我測試 → seed2981 三部分 → base2、shift 第 1 部分 → 複製到本倉庫）：
+
+```
+nohup bash run_diag.sh > run_diag.log 2>&1 &
+```
+
+逐步執行（以 seed2981 為例；`FLIST` = Ψ8 加權清單，`MLIST` = 那 9 張的清單）：
+
+```
+FLIST=/mnt/data2t/BUSI/psi_lists/wcases_busi_psi8_rotation.csv
+MLIST=/mnt/data2t/BUSI/psi_lists/moved_busi_dice02.csv
+
+# 0. 自我測試
+python failure_diagnostics.py --selftest
+
+# 1. 產生 npz（機率圖、Ψ、梯度）→ outputs/diag/busi_UKAN_seed2981_best.npz
+python make_diag_npz.py --name busi_UKAN_seed2981 --which best --features --grads --flag_list $FLIST
+
+# 2. 教授的程式 → outputs/diag/seed2981_best/per_case.csv、summary.json
+python failure_diagnostics.py --npz outputs/diag/busi_UKAN_seed2981_best.npz --out-dir outputs/diag/seed2981_best --delta 0.5 \
+  --tau psi1_convex=1.0512699 --tau psi6_cc=0 --tau psi8_rotation=0.3315249 --shape-features psi1_convex psi6_cc
+
+# 3. 編號換成影像名稱
+python name_cases.py outputs/diag/busi_UKAN_seed2981_best.npz outputs/diag/seed2981_best/per_case.csv $MLIST
+```
+
+- 4,721 維：第 1 步加 `--params decoder5,final --out outputs/diag/busi_UKAN_seed2981_best_dec5.npz`，第 2、3 步的路徑改成 `_dec5`。
+- 其他模型只做第 1 部分：第 1 步不加 `--features --grads`（例 `--name busi_UKAN_base2 --which last`），第 2 步只給 `--npz --out-dir --delta 0.5`。
+
+| 參數 | 意思 |
+|---|---|
+| `--name`、`--which best / last` | 模型資料夾（outputs/ 底下）；用 model.pth（best）或 model_last.pth（last） |
+| `--features` | 加入 Ψ1、Ψ6、Ψ8（第 3 部分需要） |
+| `--grads`、`--params`、`--flag_list`、`--wfactor` | 算梯度（第 2 部分需要）：參數層（預設 final）、加權清單、權重（預設 3） |
+| `--delta` | Dice < 0.5 算失敗 |
+| `--tau` | Ψ 門檻（psi-weighted-busi 的門檻；程式用「>」，所以「≥」的門檻減 1e-7） |
+| `--shape-features` | 只由遮罩計算的 Ψ，用於偵測上限 |
+| 其餘 | 教授程式預設：`--cand-thr 0.2`、`--score max`、`--hit-frac 0.3`、`--ks 1 2 3 5`、`--seed 0`、bootstrap 1,000 次 |
 
 **教授程式的函式**（我們用到的設定寫在括號內）：
 
