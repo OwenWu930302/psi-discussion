@@ -37,7 +37,7 @@ ap.add_argument('--feature_csv', default='outputs/busi_UKAN_seed2981/percase_bes
 ap.add_argument('--grads', action='store_true')
 ap.add_argument('--flag_list', default='/mnt/data2t/BUSI/psi_lists/wcases_busi_psi8_rotation.csv')
 ap.add_argument('--wfactor', default=3.0, type=float)
-ap.add_argument('--params', default='final', help='算梯度的參數：名稱以此開頭者（預設 final = 輸出層）')
+ap.add_argument('--params', default='final', help='算梯度的參數：名稱以這些開頭者，逗號分隔（預設 final = 輸出層；例 decoder5,final）')
 ap.add_argument('--diag', default='failure_diagnostics.py')
 ap.add_argument('--out', default=None)
 args = ap.parse_args()
@@ -97,7 +97,8 @@ if args.grads:
     flag = set(pd.read_csv(args.flag_list, encoding='utf-8-sig').iloc[:, 0].astype(str))
     fl = [i for i in tr if i in flag]
     ct = [i for i in tr if i not in flag]
-    names = [n for n, p in model.named_parameters() if p.requires_grad and n.startswith(args.params)]
+    PFX = tuple(args.params.split(','))
+    names = [n for n, p in model.named_parameters() if p.requires_grad and n.startswith(PFX)]
     print(f'梯度參數：{names}（{sum(p.numel() for n, p in model.named_parameters() if n in names)} 維）')
     lossf = losses.BCEDiceLoss()
 
@@ -107,7 +108,7 @@ if args.grads:
             yield x, torch.from_numpy(g.astype(np.float32))[None, None]
 
     grads = lambda lst: fd.extract_grads(model, lambda o, y: lossf(o, y), loader(lst), device=dev,
-                                         param_filter=lambda n: n.startswith(args.params))
+                                         param_filter=lambda n: n.startswith(PFX))
     out['grads_eval'] = grads(va)
     out['grads_flag'] = grads(fl)
     out['weights_flag'] = np.full(len(fl), args.wfactor)

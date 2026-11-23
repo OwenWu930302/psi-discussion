@@ -1,0 +1,103 @@
+{
+  "n_cases": 130,
+  "n_failures": 15,
+  "delta": 0.5,
+  "failure_types": {
+    "delineation": 6,
+    "wrong-choice": 0,
+    "missed": 9
+  },
+  "recall_at_k_on_failures": {
+    "1": 0.4,
+    "2": 0.4,
+    "3": 0.4,
+    "5": 0.4
+  },
+  "recall_at_k_on_all": {
+    "1": 0.9307692307692308,
+    "2": 0.9307692307692308,
+    "3": 0.9307692307692308,
+    "5": 0.9307692307692308
+  },
+  "alignment_on_failures": {
+    "rho_max": 0.630442326401287,
+    "rho_G": -0.3717676989544794,
+    "A": -161.0650077984661,
+    "gain_x_M": 0.07317183257925446,
+    "coverage": -59.92686518015878
+  },
+  "frac_failures_with_A_positive": 0.26666666666666666,
+  "frac_failures_with_rho_max_positive": 1.0,
+  "control_alignment_on_failures": {
+    "rho_max": 0.5789228222024143,
+    "rho_G": -0.2940352154104212,
+    "A": -17.595139418742736
+  },
+  "features": {
+    "psi1_convex": {
+      "auroc": 0.8504347826086956,
+      "auroc_ci95": [
+        0.743159420289855,
+        0.9403188405797102
+      ],
+      "tau": 1.0512699,
+      "tpr": 0.8,
+      "fpr": 0.3130434782608696,
+      "precision": 0.25,
+      "n_flagged": 48,
+      "tau_source": "given",
+      "tpr_by_failure_type": {
+        "delineation": 0.8333333333333334,
+        "wrong-choice": null,
+        "missed": 0.7777777777777778
+      }
+    },
+    "psi6_cc": {
+      "auroc": 0.7133333333333334,
+      "auroc_ci95": [
+        0.5785289855072464,
+        0.844427536231884
+      ],
+      "tau": 0.0,
+      "tpr": 0.5333333333333333,
+      "fpr": 0.11304347826086956,
+      "precision": 0.38095238095238093,
+      "n_flagged": 21,
+      "tau_source": "given",
+      "tpr_by_failure_type": {
+        "delineation": 0.3333333333333333,
+        "wrong-choice": null,
+        "missed": 0.6666666666666666
+      }
+    },
+    "psi8_rotation": {
+      "auroc": 0.903768115942029,
+      "auroc_ci95": [
+        0.8060797101449275,
+        0.9698550724637681
+      ],
+      "tau": 0.3315249,
+      "tpr": 0.9333333333333333,
+      "fpr": 0.20869565217391303,
+      "precision": 0.3684210526315789,
+      "n_flagged": 38,
+      "tau_source": "given",
+      "tpr_by_failure_type": {
+        "delineation": 1.0,
+        "wrong-choice": null,
+        "missed": 0.8888888888888888
+      }
+    }
+  },
+  "detection_ceiling": {
+    "nu_TPR_of_shape_flags": 0.8666666666666667,
+    "FPR_of_shape_flags": 0.3652173913043478,
+    "n_failures_inside_V": 2,
+    "n_nonfailures_inside_V": 73,
+    "auroc_within_V": {
+      "psi1_convex": 0.7123287671232876,
+      "psi6_cc": 0.5,
+      "psi8_rotation": 0.9794520547945206
+    }
+  }
+}

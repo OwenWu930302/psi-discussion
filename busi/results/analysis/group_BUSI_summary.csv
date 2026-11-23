@@ -1,0 +1,4 @@
+﻿group,model,held_out_cases,n_held_out,held_out_base2,held_out_group_model,held_out_moved,n_held_out_above_05,seen_6_group_model,remaining_121_base2,remaining_121_group_model
+g1,busi_UKAN_moved_g1,benign (247); benign (223); malignant (198),3,0.0079,0.2532,0.9688,1,0.8450,0.8398,0.8402
+g2,busi_UKAN_moved_g2,benign (257); malignant (105); benign (116),3,0.0000,0.3050,0.9476,1,0.9656,0.8398,0.8534
+g3,busi_UKAN_moved_g3,malignant (106); benign (367); benign (236),3,0.0000,0.0296,0.9700,0,0.8008,0.8398,0.8542
