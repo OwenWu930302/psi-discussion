@@ -8,7 +8,7 @@
 cd "$(dirname "$0")"
 MODELS=${MODELS:-drop3_r2 speckle}
 DISC=${DISC:-$HOME/桌面/論文/psi-discussion}
-BUSIREPO=${BUSIREPO:-$HOME/桌面/論文/psi-weighted-busi}
+BUSIREPO=${BUSIREPO:-$HOME/桌面/論文/psi-weighted-ukan}
 TRAIN=${TRAIN:-python train.py}         # 測試用；正式執行不需設定
 EXTRA=${EXTRA:-}                        # 測試用；正式執行不需設定
 EPOCHS=${EPOCHS:-400}                   # 判斷訓練是否完成（官方預設 400）

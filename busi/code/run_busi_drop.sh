@@ -1,5 +1,5 @@
 #!/bin/bash
-# BUSI Dropout 實驗（結果只放 psi-discussion，不放 psi-weighted-busi）；依優先順序訓練，可中斷後重跑
+# BUSI Dropout 實驗（結果只放 psi-discussion，不放 psi-weighted-ukan）；依優先順序訓練，可中斷後重跑
 #   U-KAN 原版的 KANLayer 建立了 Dropout 但沒有使用（drop_rate 無作用）→ patch_dropout.py 接上（只在 4 個 KAN 區塊）
 #   1 busi_UKAN_drop1        ：Dropout 0.1（無資料增強）        對照組 base2、base3
 #   2 busi_UKAN_shift_drop1  ：Dropout 0.1 + 平移增強 ±32 px     對照組 shift、shift_r2

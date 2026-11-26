@@ -1,5 +1,5 @@
 #!/bin/bash
-# BUSI 平移增強實驗（結果只放 psi-discussion，不放 psi-weighted-busi）
+# BUSI 平移增強實驗（結果只放 psi-discussion，不放 psi-weighted-ukan）
 #   A busi_UKAN_shift       ：隨機平移 ±32 px（機率 0.5），9 張留在測試集
 #   B busi_UKAN_shift_moved ：同上，9 張移到訓練集
 #   其餘設定與 base2 完全相同（原作者指令 + --shift_aug）

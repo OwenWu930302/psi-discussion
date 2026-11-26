@@ -1,5 +1,5 @@
 #!/bin/bash
-# BUSI 資料增強追加實驗（結果只放 psi-discussion，不放 psi-weighted-busi）；依優先順序訓練，可中斷後重跑
+# BUSI 資料增強追加實驗（結果只放 psi-discussion，不放 psi-weighted-ukan）；依優先順序訓練，可中斷後重跑
 #   1 busi_UKAN_shift_r2       ：與 busi_UKAN_shift 完全相同，再訓練一次（確認效果、平移增強下的雜訊）
 #   2 busi_UKAN_ssr            ：平移 ±32 px + 縮放 ±10% + 旋轉 ±15°（機率 0.5）
 #   3 busi_UKAN_ssr_int        ：2 + 亮度 / 對比 ±20%、gamma 80–120（各機率 0.5）

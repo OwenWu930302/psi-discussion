@@ -1,7 +1,7 @@
 """
-BUSI 討論實驗的分析：逐張結果（last）→ busi/results/analysis/（格式比照 psi-weighted-busi/results/analysis）
+BUSI 討論實驗的分析：逐張結果（last）→ busi/results/analysis/（格式比照 psi-weighted-ukan/results/analysis）
 輸入
-  對照組、Ψ8 專家、moved、baseline：psi-weighted-busi/results/percase/
+  對照組、Ψ8 專家、moved、baseline：psi-weighted-ukan/results/percase/
   本倉庫的模型                     ：busi/results/percase/busi_UKAN_<模型>_last.csv
   擾動測試逐張                     ：busi/results/analysis/perturb_BUSI_percase.csv、sweep_BUSI_percase.csv
 輸出
@@ -18,7 +18,7 @@ BUSI 討論實驗的分析：逐張結果（last）→ busi/results/analysis/（
 組別（以官方原始切分定義）：all 130、other 115、low_dice 15（baseline seed2981 best 的 Dice < 0.5）、
   nine 9（moved_busi_dice02.csv）、train 517（原訓練集）；搬移模型的測試集只剩 121 張（remaining）
 用法（psi-discussion 根目錄，兩個倉庫 clone 在同一層）：
-  python busi/code/make_busi_results.py --busi_repo ../psi-weighted-busi --disc .
+  python busi/code/make_busi_results.py --busi_repo ../psi-weighted-ukan --disc .
 """
 import argparse
 import os
@@ -28,7 +28,7 @@ import pandas as pd
 from scipy.stats import wilcoxon
 
 ap = argparse.ArgumentParser()
-ap.add_argument('--busi_repo', default='../psi-weighted-busi')
+ap.add_argument('--busi_repo', default='../psi-weighted-ukan')
 ap.add_argument('--disc', default='.')
 args = ap.parse_args()
 PC = os.path.join(args.disc, 'busi', 'results', 'percase')
@@ -122,7 +122,7 @@ S.to_csv(f'{OUT}/aug_BUSI_summary.csv', index=False, float_format='%.4f', encodi
 pd.DataFrame(P).to_csv(f'{OUT}/aug_BUSI_percase.csv', index=False, float_format='%.4f', encoding='utf-8-sig')
 
 # 低分 15 張：每個模型逐張的前後（before = 對照組 base2，after = 該模型；last）
-#   low_dice_BUSI_percase.csv  一個模型 × 一張影像一列（格式同 psi-weighted-busi 的 test_BUSI_percase.csv）
+#   low_dice_BUSI_percase.csv  一個模型 × 一張影像一列（格式同 psi-weighted-ukan 的 test_BUSI_percase.csv）
 #   low_dice_BUSI_wide.csv     一張影像一列、每個模型一欄（方便直接看）
 #   low_dice_BUSI_summary.csv  每個模型在 low_dice（15）、nine（9）、low_other（6）三組的平均前後
 ctrl = M['base2']

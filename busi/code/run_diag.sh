@@ -2,7 +2,7 @@
 # 用 failure_diagnostics.py 診斷 BUSI 測試集的失敗（結果只放 psi-discussion）
 #   seed2981（baseline，best；Ψ 與加權清單都由它而來）：候選排名 recall@k + 失敗類型、Ψ 的 AUROC / 門檻、梯度對齊
 #   base2、shift（last）：只做候選排名 + 失敗類型（看平移增強有沒有改變失敗的類型）
-#   Ψ 門檻與 psi-weighted-busi 的 test_BUSI_selection.csv 相同（failure_diagnostics 用「>」，所以 ≥ 的門檻略降 1e-7）
+#   Ψ 門檻與 psi-weighted-ukan 的 test_BUSI_selection.csv 相同（failure_diagnostics 用「>」，所以 ≥ 的門檻略降 1e-7）
 #   形狀特徵（只由遮罩算）：psi1_convex、psi6_cc；psi8_rotation 需要模型推論，不算形狀特徵
 # 用法（Seg_UKAN 資料夾、ukan 環境）：bash run_diag.sh > run_diag.log 2>&1
 cd "$(dirname "$0")"

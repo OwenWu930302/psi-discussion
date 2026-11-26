@@ -10,7 +10,8 @@
 7. 梯度對齊：Ψ8 加權清單的梯度和測試失敗影像的方向相反（17 維 rho_G −0.40、4,721 維 −0.37），隨機一般訓練影像也是負的（−0.18、−0.29），所以加權救不了這些影像（第 8.3 節）。
 
 模型、切分、400 epoch、超參數、評估方式全部與 [U-KAN 官方](https://github.com/CUHK-AIM-Group/U-KAN) 相同，分析一律用最後一個 epoch（last）。
-對照組 base2、base3、moved、Ψ 專家的逐張結果在 [psi-weighted-busi/results/percase](https://github.com/OwenWu930302/psi-weighted-busi/tree/main/results/percase)。
+對照組 base2、base3、moved、Ψ 專家的逐張結果在 [psi-weighted-ukan/results/percase](https://github.com/OwenWu930302/psi-weighted-ukan/tree/main/results/percase)。
+SAM 類模型（H-SAM，CVPR 2024）的 Ψ 加權結果在 [psi-weighted-hsam](https://github.com/OwenWu930302/psi-weighted-hsam)。
 
 ## 0. 模型一覽（依類別）
 
@@ -41,7 +42,7 @@
 | 路徑 | 內容 |
 |---|---|
 | [code/](code/) | 對 `train.py` 的修改（patch_*.py）、訓練腳本（run_*.sh）、擾動測試（perturb_busi.py）、分析（make_busi_results.py） |
-| [results/percase/](results/percase/) | 本倉庫每個模型的逐張 Dice（best、last），格式同 psi-weighted-busi |
+| [results/percase/](results/percase/) | 本倉庫每個模型的逐張 Dice（best、last），格式同 psi-weighted-ukan |
 | [results/training_logs/](results/training_logs/) | 每個模型 400 epoch 的訓練紀錄 |
 | [results/analysis/](results/analysis/) | 所有彙整表（下面每一節都註明用哪一個） |
 | [results/diagnostics/](results/diagnostics/) | failure_diagnostics.py 的結果：每個模型一個資料夾，per_case.csv（每張一列）與 summary.json |
@@ -283,7 +284,7 @@ python name_cases.py outputs/diag/busi_UKAN_seed2981_best.npz outputs/diag/seed2
 | `--features` | 加入 Ψ1、Ψ6、Ψ8（第 3 部分需要） |
 | `--grads`、`--params`、`--flag_list`、`--wfactor` | 算梯度（第 2 部分需要）：參數層（預設 final）、加權清單、權重（預設 3） |
 | `--delta` | Dice < 0.5 算失敗 |
-| `--tau` | Ψ 門檻（psi-weighted-busi 的門檻；程式用「>」，所以「≥」的門檻減 1e-7） |
+| `--tau` | Ψ 門檻（psi-weighted-ukan 的門檻；程式用「>」，所以「≥」的門檻減 1e-7） |
 | `--shape-features` | 只由遮罩計算的 Ψ，用於偵測上限 |
 | 其餘 | 教授程式預設：`--cand-thr 0.2`、`--score max`、`--hit-frac 0.3`、`--ks 1 2 3 5`、`--seed 0`、bootstrap 1,000 次 |
 
@@ -332,7 +333,7 @@ delineation = 第 1 名候選就命中但 Dice 低；wrong-choice = 命中的是
 
 - Ψ8 最好（AUROC 0.90）：6 張 delineation 全抓到，9 張 missed 抓到 8 張。
 - 形狀特徵（Ψ1、Ψ6，只由預測遮罩計算）合起來抓到 87% 的失敗，誤報率 37%；兩者都沒標到的影像中只剩 2 張失敗，在這群裡 Ψ8 的 AUROC 是 0.98。
-- 門檻與 psi-weighted-busi 的 test_BUSI_selection.csv 相同（failure_diagnostics 用「>」，所以「≥」的門檻略降 1e-7；抓到的張數與該檔一致）。
+- 門檻與 psi-weighted-ukan 的 test_BUSI_selection.csv 相同（failure_diagnostics 用「>」，所以「≥」的門檻略降 1e-7；抓到的張數與該檔一致）。
 
 ### 8.3 梯度對齊（seed2981）
 
@@ -409,5 +410,5 @@ moved 把 9 張全部搬進訓練集能到 0.96，但第 5 節顯示那是死記
 兩個倉庫 clone 在同一層，於 psi-discussion 根目錄執行：
 
 ```
-python busi/code/make_busi_results.py --busi_repo ../psi-weighted-busi --disc .
+python busi/code/make_busi_results.py --busi_repo ../psi-weighted-ukan --disc .
 ```
